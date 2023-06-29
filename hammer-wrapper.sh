@@ -13,5 +13,5 @@ for num_of_files in 10 1000 2000
 do
     printf "\nTesting on $num_of_files files\n"
     mkdir -p $logdir/nfiles_$num_of_files
-    hammer-runner.py --url $rundir --protocols xroot --threads 10 50 100 200 --operations write read delete --runs $num_of_runs --nfiles $num_of_files --data-repo $logdir/nfiles_$num_of_files/
+    hammer-runner.py --url $rundir --protocols xroot --threads 10 50 100 200 --operations write read delete --runs $num_of_runs --nfiles $num_of_files --data-repo $logdir/nfiles_$num_of_files/ | tee -a $logdir/nfiles_$num_of_files/hammer-runner_ouput.log
 done
