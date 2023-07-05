@@ -11,10 +11,10 @@ xrootd_url=eoshomedev.cern.ch//eos/homedev/loadtest
 logs_dir=/eos/homedev/loadtest/logs
 
 # -------------------------
-# grid-hammer
+# grid-hammer - xrootd
 # -------------------------
 
-run_dir=/eos/homedev/loadtest/hammer-runspace
+run_dir=/eos/homedev/loadtest       # should be the same folder as xrootd_url
 num_of_files=(10 1000 2000)
 num_of_runs=1
 threads="10 50 100 200"
@@ -25,3 +25,10 @@ operations="write read delete"
 # -------------------------
 
 config_file=~/filebench_conf/singlestreamread.f
+
+# -------------------------
+# fio - FUSE
+# -------------------------
+
+num_of_jobs=(10 50)
+size_of_file=(50 100)               # in MB

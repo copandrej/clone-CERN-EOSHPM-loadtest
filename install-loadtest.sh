@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Install script for grid-hammer and FUSE on a new VM
+# Install script for grid-hammer, filebench, fio...
 
 set -e
 
@@ -16,7 +16,7 @@ priority=20
 
 yum install -y grid-hammer
 
-# FUSE
+# Filebench
 
 tempdir=$(mktemp -d)
 cd $tempdir
@@ -30,6 +30,10 @@ cd filebench-1.5-alpha3
 make
 make install
 
-# Clean up
 cd
 rm -rf $tempdir
+
+
+# fio
+
+yum install -y fio
