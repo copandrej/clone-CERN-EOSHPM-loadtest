@@ -12,36 +12,40 @@ exit_code=0
 
 # Load configuration
 
+echo -e "\nLoading configuration from conf.sh\n"
 source conf.sh
 if [ ! $? -eq 0 ]; then
-    echo "Error: loading configuratoin failed" >&2
+    echo -e "\nERROR: loading configuratoin failed\n" >&2
     exit 1
 fi
 
 
 # Run Grid Hammer
 
+echo -e "\nRunning grid-hammer loadtest...\n"
 ./tools/hammer-wrapper.sh
 if [ ! $? -eq 0 ]; then
-    echo "\nError: grid-hammer loadtest was not successful, check logs in $logs_dir\n" >&2
+    echo -e "\nERROR: grid-hammer loadtest was not successful, check logs in $logs_dir\n" >&2
     exit_code=1
 fi
 
 
 # Run Filebench
 
+echo -e "\nRunning filebench loadtest...\n"
 ./tools/filebench-wrapper.sh
 if [ ! $? -eq 0 ]; then
-    echo "\nError: filebench loadtest was not successful, check logs in $logs_dir\n" >&2
+    echo -e "\nERROR: filebench loadtest was not successful, check logs in $logs_dir\n" >&2
     exit_code=1
 fi
 
 
 # Run fio
 
+echo -e "\nRunning fio loadtest...\n"
 ./tools/fio-wrapper.sh
 if [ ! $? -eq 0 ]; then
-    echo "\nError: fio loadtest was not successful, check logs in $logs_dir\n" >&2
+    echo -e "\nERROR: fio loadtest was not successful, check logs in $logs_dir\n" >&2
     exit_code=1
 fi
 

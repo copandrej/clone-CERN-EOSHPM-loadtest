@@ -20,4 +20,4 @@ do
     test ${PIPESTATUS[0]} -eq 0 # exit code 1 if hammer-runner.py fails
 done
 
-rmdir $run_dir/$folder
+rmdir $run_dir/hammer-runspace/$folder
