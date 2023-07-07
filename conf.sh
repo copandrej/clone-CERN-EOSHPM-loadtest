@@ -24,7 +24,7 @@ operations="write read delete"
 # filebench - FUSE
 # -------------------------
 
-config_file=~/filebench_conf/singlestreamread.f
+config_file=tools/filebench-configs/fileserver.f
 
 # -------------------------
 # fio - FUSE

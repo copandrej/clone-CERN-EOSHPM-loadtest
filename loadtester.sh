@@ -5,7 +5,11 @@
 # To install programs and dependencies on a new machine, run install-loadtest.sh
 # Adjust variables in conf.sh before running
 
+WORKING_DIRECTORY=$(pwd)
+cd "$(dirname "$0")"
+
 exit_code=0
+
 # Load configuration
 
 source conf.sh
@@ -13,6 +17,7 @@ if [ ! $? -eq 0 ]; then
     echo "Error: loading configuratoin failed" >&2
     exit 1
 fi
+
 
 # Run Grid Hammer
 
@@ -25,8 +30,11 @@ fi
 
 # Run Filebench
 
-# mkdir -p $logs_dir/filebench
-# filebench -f $config_file | tee $logs_dir/filebench/$(date +"%F_%T").log
+./tools/filebench-wrapper.sh
+if [ ! $? -eq 0 ]; then
+    echo "\nError: filebench loadtest was not successful, check logs in $logs_dir\n" >&2
+    exit_code=1
+fi
 
 
 # Run fio
@@ -38,4 +46,5 @@ if [ ! $? -eq 0 ]; then
 fi
 
 
+cd $WORKING_DIRECTORY
 exit $exit_code
