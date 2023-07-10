@@ -12,7 +12,7 @@ for njobs in "${num_of_jobs[@]}";
 do
     for size in "${size_of_file[@]}";
     do
-        fio --name=load_test --ioengine=sync --rw=rw --numjobs=$njobs --group_reporting --direct=1 --size=$size\M --verify=md5 --verify_fatal=1 --directory=$fuse_mountpoint/fio/$folder/ | tee $logs_dir/fio/$folder/fio_njobs_$njobs\_size_$size.log
+        fio --name=load_test --verify_state_save=0 --ioengine=sync --rw=rw --numjobs=$njobs --group_reporting --direct=1 --size=$size\M --verify=md5 --verify_fatal=1 --directory=$fuse_mountpoint/fio/$folder/ | tee $logs_dir/fio/$folder/fio_njobs_$njobs\_size_$size.log
     done
 done
 
