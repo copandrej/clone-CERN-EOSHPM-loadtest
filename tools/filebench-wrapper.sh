@@ -13,7 +13,7 @@ mkdir -p $fuse_mountpoint/filebench/$dat
 temp_config_file=$(mktemp)
 sed "/^set \$dir/c\set \$dir=$fuse_mountpoint/filebench/$dat/" $config_file > $temp_config_file
 
-filebench -f $temp_config_file | tee $logs_dir/filebench/$dat.log
+filebench -f $temp_config_file > $logs_dir/filebench/$dat.log
 
 rm -f $temp_config_file
 rm -rf $fuse_mountpoint/filebench/$dat

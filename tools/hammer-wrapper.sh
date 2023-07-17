@@ -14,9 +14,8 @@ logs=$logs_dir/hammer-wrapper/$folder
 
 for num_of_files in "${num_of_files[@]}";
 do
-    printf "\nTesting on $num_of_files files\n"
     mkdir -p $logs/nfiles_$num_of_files
-    hammer-runner.py --url $url/ --protocols xroot --strict-exit-code 1 --threads $threads --operations $operations --runs $num_of_runs --nfiles $num_of_files --data-repo $logs/nfiles_$num_of_files/ | tee -a $logs/nfiles_$num_of_files/hammer-runner_ouput.log
+    hammer-runner.py --url $url/ --protocols xroot --strict-exit-code 1 --threads $threads --operations $operations --runs $num_of_runs --nfiles $num_of_files --data-repo $logs/nfiles_$num_of_files/ > $logs/nfiles_$num_of_files/hammer-runner_ouput.log
     test ${PIPESTATUS[0]} -eq 0 # exit code 1 if hammer-runner.py fails
     
     if [ "$plot_graphs" = true ]; then
