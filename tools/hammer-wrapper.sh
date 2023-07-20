@@ -15,7 +15,11 @@ logs=$logs_dir/hammer-wrapper/$folder
 for num_of_files in "${num_of_files[@]}";
 do
     mkdir -p $logs/nfiles_$num_of_files
-    hammer-runner.py --url $url/ --protocols xroot --strict-exit-code 1 --threads $threads --operations $operations --runs $num_of_runs --nfiles $num_of_files --data-repo $logs/nfiles_$num_of_files/ > $logs/nfiles_$num_of_files/hammer-runner_ouput.log
+    
+    hammer-runner.py --url $url/ --protocols xroot --strict-exit-code 1 --threads $threads --operations $operations \
+        --runs $num_of_runs --nfiles $num_of_files --data-repo $logs/nfiles_$num_of_files/ \
+        | sed -e 's/\x1b\[[0-9;]*m//g' > $logs/nfiles_$num_of_files/hammer-runner_ouput.log # sed clears the color codes from the output
+
     test ${PIPESTATUS[0]} -eq 0 # exit code 1 if hammer-runner.py fails
     
     if [ "$plot_graphs" = true ]; then
@@ -25,4 +29,8 @@ do
     fi
 done
 
-rmdir $run_dir/hammer-runspace/$folder
+if [ $run_dir ] && [ $logs_dir ]; then
+    rmdir $run_dir/hammer-runspace/$folder
+else 
+    printf "WARNING: deleting runspace faild, delete it manually: $run_dir/hammer-runspace/$folder\n"
+fi

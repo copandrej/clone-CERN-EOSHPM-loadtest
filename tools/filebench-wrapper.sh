@@ -16,4 +16,8 @@ sed "/^set \$dir/c\set \$dir=$fuse_mountpoint/filebench/$dat/" $config_file > $t
 filebench -f $temp_config_file > $logs_dir/filebench/$dat.log
 
 rm -f $temp_config_file
-rm -rf $fuse_mountpoint/filebench/$dat
+if [ $fuse_mountpoint ] && [ $dat ]; then
+    rm -rf $fuse_mountpoint/filebench/$dat
+else
+    printf "WARNING: deleting runspace faild, delete it manually: $fuse_mountpoint/filebench/$dat\n"
+fi

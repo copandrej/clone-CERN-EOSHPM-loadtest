@@ -16,4 +16,8 @@ do
     done
 done
 
-rm -rf $fuse_mountpoint/fio/$folder
+if [ $fuse_mountpoint ] && [ $folder ]; then
+    rm -rf $fuse_mountpoint/fio/$folder
+else
+    printf "WARNING: deleting runspace faild, delete it manually: $fuse_mountpoint/fio/$folder\n"
+fi
