@@ -5,6 +5,13 @@
 # To install programs and dependencies on a new machine, run install-loadtest.sh
 # Adjust variables in conf.sh before running
 
+# if inside docker then /etc-host exists (container volume) run kinit from there
+if [ -d /host-etc ]; then
+    kinit -kt /host-etc/krb5.keytab.eostest eostest
+else
+    kinit -kt /etc/krb5.keytab.eostest eostest
+fi
+
 WORKING_DIRECTORY=$(pwd)
 cd "$(dirname "$0")"
 

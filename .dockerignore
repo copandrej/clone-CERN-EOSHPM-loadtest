@@ -1,0 +1,5 @@
+*.md
+Dockerfile
+.git
+install-loadtest.sh
+.dockerignore
