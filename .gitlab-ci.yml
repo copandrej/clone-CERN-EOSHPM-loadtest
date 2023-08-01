@@ -11,11 +11,14 @@
 # for the default branch and all other (MR) branches.
 
 docker-build:
-  # Use the official docker image.
   image: gitlab-registry.cern.ch/dss/docker-enhanced:19.03.12
   stage: build
   services:
-    - docker:19.03.12-dind
+    - name: docker:19.03.12-dind
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://127.0.0.1:2375
+    
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   # Default branch leaves tag empty (= latest tag)
@@ -29,7 +32,7 @@ docker-build:
         tag=":$CI_COMMIT_REF_SLUG"
         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
       fi
-    - docker build --pull -t "$CI_REGISTRY_IMAGE${tag}" .
+    - docker build -t "$CI_REGISTRY_IMAGE${tag}" .
     - docker push "$CI_REGISTRY_IMAGE${tag}"
   # Run this job in a branch where a Dockerfile exists
   rules:
