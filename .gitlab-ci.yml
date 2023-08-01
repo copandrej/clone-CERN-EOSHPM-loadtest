@@ -15,9 +15,9 @@ docker-build:
   stage: build
   services:
     - name: docker:19.03.12-dind
-      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   variables:
-    DOCKER_HOST: tcp://127.0.0.1:2375
+    DOCKER_HOST: tcp://127.0.0.1:2375/
+    DOCKER_TLS_CERTDIR: "/certs"
     
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
