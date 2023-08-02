@@ -21,6 +21,9 @@ build_docker_image:
         - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $IMAGE_DESTINATION
         # Print the full registry path of the pushed image
         - echo "Image pushed successfully to ${IMAGE_DESTINATION}"
+    only:
+        - master
+
 
 # Limitations
 # * If your base image does not have a PATH value, your Dockerfile will require to specify one. Ref. https://github.com/GoogleContainerTools/kaniko/issues/650

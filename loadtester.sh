@@ -12,6 +12,8 @@ else
     kinit -kt /etc/krb5.keytab.eostest eostest
 fi
 
+ulimit -n 1048576 # Open files limit fix
+
 WORKING_DIRECTORY=$(pwd)
 cd "$(dirname "$0")"
 
