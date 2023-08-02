@@ -1,41 +1,27 @@
-# This file is a template, and might need editing before it works on your project.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml
+# templeta from https://gitlab.cern.ch/chbell/build_docker_image/-/blob/master/.gitlab-ci.yml
+# In order to add container scanning for known vulnerabilities on your built Docker images, please refer to https://gitlab.cern.ch/gitlabci-examples/container_scanning
 
-# Build a Docker image with CI/CD and push to the GitLab registry.
-# Docker-in-Docker documentation: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
+# Kaniko is the recommended method for running Docker-builds as of May 2019. 
+# See https://docs.gitlab.com/ee/ci/docker/using_kaniko.html for GitLab's documentation.
 #
-# This template uses one generic job with conditional builds
-# for the default branch and all other (MR) branches.
+# N.B.: if using docker-image-build tag in the past, and passing arguments to the image at build time (such as BUILD_ARG_1:'MY_VAR=my_value'
+# consider checking https://github.com/GoogleContainerTools/kaniko#flag---build-arg to pass arguments to the Kaniko executor.
+build_docker_image:
+    stage: build
+    variables:
+      IMAGE_DESTINATION: ${CI_REGISTRY_IMAGE}:latest
+    image: 
+        # The kaniko debug image is recommended because it has a shell, and a shell is required for an image to be used with GitLab CI/CD.
+        name: gcr.io/kaniko-project/executor:debug
+        entrypoint: [""]
+    script:
+        # Prepare Kaniko configuration file
+        - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+        # Build and push the image from the Dockerfile at the root of the project.
+        - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $IMAGE_DESTINATION
+        # Print the full registry path of the pushed image
+        - echo "Image pushed successfully to ${IMAGE_DESTINATION}"
 
-docker-build:
-  image: gitlab-registry.cern.ch/dss/docker-enhanced:19.03.12
-  stage: build
-  services:
-    - name: docker:19.03.12-dind
-  variables:
-    DOCKER_HOST: tcp://127.0.0.1:2375/
-    DOCKER_TLS_CERTDIR: "/certs"
-    
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-  # Default branch leaves tag empty (= latest tag)
-  # All other branches are tagged with the escaped branch name (commit ref slug)
-  script:
-    - |
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-        tag=""
-        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
-      else
-        tag=":$CI_COMMIT_REF_SLUG"
-        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-      fi
-    - docker build -t "$CI_REGISTRY_IMAGE${tag}" .
-    - docker push "$CI_REGISTRY_IMAGE${tag}"
-  # Run this job in a branch where a Dockerfile exists
-  rules:
-    - if: $CI_COMMIT_BRANCH
-      exists:
-        - Dockerfile
+# Limitations
+# * If your base image does not have a PATH value, your Dockerfile will require to specify one. Ref. https://github.com/GoogleContainerTools/kaniko/issues/650
+# * Kaniko depends on the Docker image repositories supporting schema2 (https://docs.docker.com/registry/spec/manifest-v2-2/), both for pulling and pushing, so it will not work otherwise. As of July 2019, this is the case with quay.io. Ref https://github.com/moby/buildkit/issues/409
