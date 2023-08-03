@@ -7,9 +7,12 @@
 
 # if inside docker then /etc-host exists (container volume) run kinit from there
 if [ -d /host-etc ]; then
-    kinit -kt /host-etc/krb5.keytab.eostest eostest
-else
-    kinit -kt /etc/krb5.keytab.eostest eostest
+    if (( $(ls /host-etc | wc -l) != 1)); then 
+        echo "WARNING: Kerberos keytab file is not properly mounted in /host-etc/, container might not have access to EOS" >&2; 
+    else
+        keytab_file=$(ls /host-etc)
+        kinit -kt /host-etc/$keytab_file ${keytab_file#*keytab.}
+    fi
 fi
 
 ulimit -n 1048576 # Open files limit fix

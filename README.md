@@ -86,10 +86,13 @@ Latest image location from master:
 
 Container should be ran as:
 ```bash
-docker run -it --net=host --entrypoint /bin/bash -v <eos-mountpoint>:/eos/homedev/loadtest -v /etc:/host-etc eoshpm-loadtest
+docker run -it --net=host --entrypoint /bin/bash -v <eos-mountpoint>:/eos/homedev/loadtest -v /etc/<krb5.keytab.* file>:/host-etc/<krb5.keytab.* file> eoshpm-loadtest
 ```
 Change `<eos-mountpoint>` to where EOS is mounted on the host machine.
-Mounting `/etc` is needed for authentication with kerberos.
+
+Second volume (`<krb5.keytab.* file>`) should point to Kerberos keytab file, which is needed for writing to EOS. Only one keytab file should be mounted or the tool will fail.
+
+To directly run the tool through container use entrypoint: `--entrypoint /eoshpm-loadtest/loadtester.sh`.
 
 ## Further development
 The tool is designed to be modular, so adding new tools should be straightforward, with the exception of the analysis script, which requires complex parsing of the output logs of each tool.
