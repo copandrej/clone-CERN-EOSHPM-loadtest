@@ -7,6 +7,9 @@ source conf.sh
 
 folder=$(date +"%F_%T")
 mkdir -p $run_dir/hammer-runspace/$folder
+
+trap "if [ $run_dir ] && [ $folder ]; then rm -rf $run_dir/hammer-runspace/$folder; fi;" EXIT
+
 url=$xrootd_url/hammer-runspace/$folder
 
 mkdir -p $logs_dir/hammer-wrapper/$folder
@@ -28,9 +31,3 @@ do
         hammer-visualizer.py --path $logs/nfiles_$num_of_files/*/ad-hoc-$num_of_files-files/eoshpmload.cern.ch/ --output-dir $logs/graphs/nfiles_$num_of_files/
     fi
 done
-
-if [ $run_dir ] && [ $logs_dir ]; then
-    rmdir $run_dir/hammer-runspace/$folder
-else 
-    printf "WARNING: deleting runspace faild, delete it manually: $run_dir/hammer-runspace/$folder\n"
-fi
