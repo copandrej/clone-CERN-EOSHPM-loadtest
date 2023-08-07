@@ -6,14 +6,6 @@
 # Adjust variables in conf.sh before running
 
 # if inside docker then /etc-host exists (container volume) run kinit from there
-if [ -d /host-etc ]; then
-    if (( $(ls /host-etc | wc -l) != 1)); then 
-        echo "WARNING: Kerberos keytab file is not properly mounted in /host-etc/, container might not have access to EOS" >&2; 
-    else
-        keytab_file=$(ls /host-etc)
-        kinit -kt /host-etc/$keytab_file ${keytab_file#*keytab.}
-    fi
-fi
 
 ulimit -n 1048576 # Open files limit fix
 
@@ -31,6 +23,20 @@ if [ ! $? -eq 0 ]; then
     exit 1
 fi
 
+#Authenticate with Kerberos for container, check if already authenticated and check if keytab is mounted
+
+klist -s
+if [ ! $? -eq 0 ]; then
+    if [ -d /host-etc ]; then
+        if (( $(ls /host-etc | wc -l) != 1)); then 
+            echo "WARNING: Kerberos keytab file is not properly mounted in /host-etc/, container might not have access to EOS" >&2; 
+        else
+            echo "Authenticating with Kerberos..."
+            keytab_file=$(ls /host-etc)
+            kinit -kt /host-etc/$keytab_file ${keytab_file#*keytab.}
+        fi
+    fi
+fi
 
 # Run Grid Hammer
 
