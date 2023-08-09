@@ -209,7 +209,11 @@ def get_newest_file_name(path: str, num: int = 1) -> str:
     """
     list_of_files = glob.glob(path + "/*")
     list_of_files.sort(key=os.path.getctime)
-    return list_of_files[-num]
+    
+    try :
+        return list_of_files[-num]
+    except IndexError:
+        raise Exception(f"\nERROR: Correct logs were not found! Check the --old or --custom arguments or change log path")
 
 
 def print_filebench_configs(filename: str) -> None:
@@ -242,17 +246,53 @@ def main() -> int:
     filebench_logs = get_newest_file_name(logs_dir + "/filebench", num)
     fio_logs = get_newest_file_name(logs_dir + "fio", num)
     
-    print("\nApproximate loadtest time: ", hammer_logs.split("/")[-1])
+    time_of_run = hammer_logs.split("/")[-1]
+    print("\nApproximate loadtest time: ", time_of_run)
+    
+    export_data = {
+        "hammer": [],
+        "filebench": [],
+        "fio": []
+    }
     
     try:
         print_header("GRID HAMMER")
         for folder in os.listdir(hammer_logs):
             grid_hammer_results = parse_grid_hammer(hammer_logs + "/" + folder + "/hammer-runner_ouput.log")
 
-            for result in grid_hammer_results:
-                result.print_configs()
-                result.print_metrics()
-                print_separator()
+            num_results = 1
+            avg_results = Results("GRID HAMMER", {}, {})
+            
+            for ix, result in enumerate(grid_hammer_results):
+                if ix + 1 < len(grid_hammer_results) and result.configs == grid_hammer_results[ix+1].configs:
+                    num_results += 1
+                    if num_results == 2:
+                        avg_results.configs = result.configs
+                        avg_results.metrics = result.metrics
+                        
+                    for k, v in grid_hammer_results[ix+1].metrics.items():
+                        avg_results.metrics[k] += v
+                    continue
+                    
+                elif num_results > 1:
+                    for k, v in avg_results.metrics.items():
+                        avg_results.metrics[k] = round(v / num_results, 2)
+                        
+                    print(f"Average over {num_results} runs:")
+                    avg_results.print_configs()
+                    avg_results.print_metrics()
+                    print_separator()
+                    
+                    export_data["hammer"].append({ "result" : avg_results.metrics, "configs" : avg_results.configs, "time" : time_of_run  })
+                    avg_results = Results("GRID HAMMER", {}, {})
+                    num_results = 1
+                
+                else:
+                    result.print_configs()
+                    result.print_metrics()
+                    print_separator()
+                    export_data["hammer"].append({ "result" : result.metrics, "configs" : result.configs, "time" : time_of_run  })
+
 
     except Exception as error:
         print(f"\nParsing Grid Hammer Results failed. Please check the verbose logs in logs directory: {logs_dir}\n")
@@ -266,6 +306,7 @@ def main() -> int:
         print_filebench_configs(conf['config_file'])
         filebench_results = Results("FILEBENCH loadtest", parse_filebench(filebench_logs))
         filebench_results.print_metrics()
+        export_data["filebench"].append({ "result" : filebench_results.metrics, "configs" : filebench_results.configs, "time" : time_of_run  })
 
     except Exception as error:
         print(f"\nParsing Filebench Results failed. Please check the tool output logs in: {logs_dir}\n")
@@ -276,7 +317,6 @@ def main() -> int:
     try:
         print_header("FIO BENCHMARK")
         for file in os.listdir(fio_logs):
-            fio_results = []
             
             if file.startswith("fio"):
                 metrics, configs = parse_fio(fio_logs + "/" + file)
@@ -284,7 +324,7 @@ def main() -> int:
                 fio_result.print_configs()
                 fio_result.print_metrics()
                 print_separator()
-                fio_results.append(fio_result)
+                export_data["fio"].append({ "result" : fio_result.metrics, "configs" : fio_result.configs, "time" : time_of_run  })
 
     except Exception as error:
         print(f"\nParsing FIO Results failed. Please check the tool output logs in: {logs_dir}\n")
@@ -293,6 +333,15 @@ def main() -> int:
         status = 1
 
     print(f"\nFor more verbose logs please check the logs directory: {logs_dir}")
+    
+    # save export_data to file
+    if not os.path.exists("analysis-out"):
+        os.makedirs("analysis-out")
+    
+    if not os.path.exists("analysis-out/export_data_" + time_of_run + ".json"):
+        with open("analysis-out/export_data_" + time_of_run + ".json", "w") as f:
+            json.dump(export_data, f)
+
     return status
 
 

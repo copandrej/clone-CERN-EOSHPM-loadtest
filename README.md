@@ -14,6 +14,7 @@ The tool is containerized with Docker, thus allowing it to run on any VM with ac
 - `loadtest.sh` - main script, runs the tools, visualizer and data analysis
 - `tools/` - directory with wrapper scripts for benchmarking tools, can be run individually
 - `analysis.py` - Python script for parsing and comparing results of benchmarking tools
+- `summary.py` - Python script prints summarized differences in percentage between two analysis results.
 - `Dockerfile` - Dockerfile for building the image, similar to `install-loadtest.sh`
 
 
@@ -73,7 +74,7 @@ Without running the test, user can use `analysis.py` script to check the results
 ./analysis.py --old 2
 
 # Compares the results of two latest runs
-paste <(./analysis.py) <(./analysis.py --old 2) | column -s $'\t' -t
+paste <(./analysis.py --old 2) <(./analysis.py) | column -s $'\t' -t
 ``````
 
 Note that filebench has its own config file in `tools/filbench-config/filserver.f`, where flow of operations and parameters can be adjusted.
@@ -103,7 +104,7 @@ All important configurations and bash variables need to be set in the `conf.sh` 
 
 Requirements and installation of the tool can be added to the `install-loadtest.sh` script as well as Dockerfile.
 
-Optionally, calling of the wrapper script can be added to `loadtest.sh`, and functions for passing output can be added to `analysis.py`.
+Optionally, calling of the wrapper script can be added to `loadtest.sh`, and functions for passing output can be added to `analysis.py` and `summary.py`.
 
 Documentation and the structure of the code are clear from comments inside the source code.
 

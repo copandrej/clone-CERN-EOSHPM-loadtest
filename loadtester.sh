@@ -70,7 +70,8 @@ fi
 
 if [[ "$*" == *"compare"* ]]
 then
-    paste <(./analysis.py) <(./analysis.py --old 2) | column -s $'\t' -t
+    paste <(./analysis.py --old 2) <(./analysis.py) | column -s $'\t' -t &&
+    ./summary.py
 else
     ./analysis.py
 fi
