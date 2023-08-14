@@ -15,9 +15,9 @@ logs_dir=/eos/homedev/loadtest/logs
 # -------------------------
 
 run_dir=/eos/homedev/loadtest       # should be the same folder as xrootd_url
-num_of_files=(1000)
-num_of_runs=1
-threads="10 30"
+num_of_files=(5000)
+num_of_runs=5
+threads="1 2 4 10"
 operations="write read delete"
 plot_graphs=false
 
@@ -31,5 +31,5 @@ config_file=tools/filebench-configs/fileserver.f
 # fio - FUSE
 # -------------------------
 
-num_of_jobs=(100 200)
+num_of_jobs=(1 2 4 10)
 size_of_file=(1)               # in MB

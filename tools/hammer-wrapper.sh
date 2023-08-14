@@ -19,7 +19,7 @@ for num_of_files in "${num_of_files[@]}";
 do
     mkdir -p $logs/nfiles_$num_of_files
     
-    hammer-runner.py --url $url/ --protocols xroot --strict-exit-code 1 --threads $threads --operations $operations \
+    hammer-runner.py --initialization --constantnfiles --url $url/ --protocols xroot --strict-exit-code 1 --threads $threads --operations $operations \
         --runs $num_of_runs --nfiles $num_of_files --data-repo $logs/nfiles_$num_of_files/ \
         | sed -e 's/\x1b\[[0-9;]*m//g' > $logs/nfiles_$num_of_files/hammer-runner_ouput.log # sed clears the color codes from the output
 

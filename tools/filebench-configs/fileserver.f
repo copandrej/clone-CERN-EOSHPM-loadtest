@@ -27,9 +27,8 @@ set $dir=UNDEFINED
 set $nfiles=1000
 set $meandirwidth=20
 set $filesize=1m
-set $nthreads=50
+set $nthreads=10
 set $iosize=1m
-set $meanappendsize=16k
 
 define fileset name=bigfileset,path=$dir,size=$filesize,entries=$nfiles,dirwidth=$meandirwidth,prealloc=80
 
@@ -43,8 +42,8 @@ define process name=filereader,instances=1
     flowop openfile name=openfile2,filesetname=bigfileset,fd=1
     flowop readwholefile name=readfile1,fd=1,iosize=$iosize
     flowop closefile name=closefile3,fd=1
-    flowop deletefile name=deletefile1,filesetname=bigfileset
     flowop listdir name=listdir1,filesetname=bigfileset
+    flowop deletefile name=deletefile1,filesetname=bigfileset
   }
 }
 

@@ -23,11 +23,11 @@ def fio_changes(test: dict, data: dict) -> tuple:
     for test_new in data["fio"]:
         if test_new["configs"] == test["configs"]:
             
-            read_change = 100 * (test_new["result"]["Read bandwidth [MiB/s]"] - test["result"]
-                                ["Read bandwidth [MiB/s]"])/test["result"]["Read bandwidth [MiB/s]"]
+            read_change = 100 * (test_new["result"]["Read throughput [MiB/s]"] - test["result"]
+                                ["Read throughput [MiB/s]"])/test["result"]["Read throughput [MiB/s]"]
             
-            write_change = 100 * (test_new["result"]["Write bandwidth [MiB/s]"] - test["result"]
-                                ["Write bandwidth [MiB/s]"])/test["result"]["Write bandwidth [MiB/s]"]
+            write_change = 100 * (test_new["result"]["Write throughput [MiB/s]"] - test["result"]
+                                ["Write throughput [MiB/s]"])/test["result"]["Write throughput [MiB/s]"]
             
             read_mean_latency_change = 100 * (test["result"]["Read mean latency [ms]"] - test_new["result"]
                                                 ["Read mean latency [ms]"])/test["result"]["Read mean latency [ms]"]
@@ -87,11 +87,11 @@ def main() -> None:
     print_header("Summary")
     print("Filebench changes:\n")
 
-    print("Read throughput: {:.2f}%".format(100*(data_new["filebench"][0]["result"]["Read bandwidth [mb/s]"] -
-          data["filebench"][0]["result"]["Read bandwidth [mb/s]"])/data["filebench"][0]["result"]["Read bandwidth [mb/s]"]))
+    print("Read throughput: {:.2f}%".format(100*(data_new["filebench"][0]["result"]["Read throughput [mb/s]"] -
+          data["filebench"][0]["result"]["Read throughput [mb/s]"])/data["filebench"][0]["result"]["Read throughput [mb/s]"]))
 
-    print("Write throughput: {:.2f}%".format(100*(data_new["filebench"][0]["result"]["Write bandwidth [mb/s]"] -
-          data["filebench"][0]["result"]["Write bandwidth [mb/s]"])/data["filebench"][0]["result"]["Write bandwidth [mb/s]"]))
+    print("Write throughput: {:.2f}%".format(100*(data_new["filebench"][0]["result"]["Write throughput [mb/s]"] -
+          data["filebench"][0]["result"]["Write throughput [mb/s]"])/data["filebench"][0]["result"]["Write throughput [mb/s]"]))
 
     print("Read latency: {:.2f}%".format(100*(data["filebench"][0]["result"]["Read mean latency [ms/o]"] - data_new["filebench"]
           [0]["result"]["Read mean latency [ms/o]"])/data["filebench"][0]["result"]["Read mean latency [ms/o]"]))

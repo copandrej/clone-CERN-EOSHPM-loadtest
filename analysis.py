@@ -63,10 +63,10 @@ def parse_fio(filename: str) -> tuple:
     configs: dict = {}
 
     # KiB/s to MiB/s
-    metrics["Write bandwidth [MiB/s]"] = round(data["jobs"][0]["write"]["bw"] / 1024, 2)
+    metrics["Write throughput [MiB/s]"] = round(data["jobs"][0]["write"]["bw"] / 1024, 2)
     metrics["Write io/s"] = round(data["jobs"][0]["write"]["iops"])
 
-    metrics["Read bandwidth [MiB/s]"] = round(data["jobs"][0]["read"]["bw"] / 1024, 2)
+    metrics["Read throughput [MiB/s]"] = round(data["jobs"][0]["read"]["bw"] / 1024, 2)
     metrics["Read io/s"] = round(data["jobs"][0]["read"]["iops"])
 
     metrics["Read mean latency [ms]"] = round(data["jobs"][0]['read']['lat_ns']['mean'] / 1_000_000, 5)  # ns to ms
@@ -75,7 +75,7 @@ def parse_fio(filename: str) -> tuple:
     metrics["Write mean latency [ms]"] = round(data["jobs"][0]['write']['lat_ns']['mean'] / 1_000_000, 5)
     metrics["Write stdev latency [ms]"] = round(data["jobs"][0]['write']['lat_ns']['stddev'] / 1_000_000, 5)
 
-    configs["Number of jobs"] = data["jobs"][0]["job options"]["numjobs"]
+    configs["Number of threads"] = data["jobs"][0]["job options"]["numjobs"]
     configs["Size of files [MB]"] = data["jobs"][0]["job options"]["size"]
 
     return metrics, configs
@@ -99,7 +99,7 @@ def parse_filebench(filename: str) -> dict:
         if line.startswith("re"):
             line = line.split()
             
-            metrics["Read bandwidth [mb/s]"] = float(line[3].replace("mb/s", ""))
+            metrics["Read throughput [mb/s]"] = float(line[3].replace("mb/s", ""))
             metrics["Read mean latency [ms/o]"] = float(line[4].replace("ms/op", ""))
             metrics["Read min latency [ms]"] = float(line[5].replace("[", "").replace("ms", ""))
             metrics["Read max latency [ms]"] = float(line[7].replace("ms]", ""))
@@ -107,7 +107,7 @@ def parse_filebench(filename: str) -> dict:
         elif line.startswith("wr"):
             line = line.split()
             
-            metrics["Write bandwidth [mb/s]"] = float(line[3].replace("mb/s", ""))
+            metrics["Write throughput [mb/s]"] = float(line[3].replace("mb/s", ""))
             metrics["Write mean latency [ms/o]"] = float(line[4].replace("ms/op", ""))
             metrics["Write min latency [ms]"] = float(line[5].replace("[", "").replace("ms", ""))
             metrics["Write max latency [ms]"] = float(line[7].replace("ms]", ""))
