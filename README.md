@@ -116,11 +116,6 @@ Project by CERN Openlab summer student [Andrej Čop](mailto:andrej7.cop@gmail.co
 Project would not be possible without existing tools:
 - [grid-hammer](https://gitlab.cern.ch/lcgdm/grid-hammer/-/tree/master)
 
-<<<<<<< HEAD
-## License
-For open source projects, say how it is licensed!
-=======
 - [filebench](https://github.com/filebench/filebench)
->>>>>>> qa
 
 - [fio](https://fio.readthedocs.io/en/latest/fio_doc.html)
