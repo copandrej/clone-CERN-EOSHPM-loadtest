@@ -1,92 +1,126 @@
 # EOSHPM loadtest
 
+The purpose of this tool is to automate load testing and benchmarking of the EOS storage system, assess its performance, and compare results while changing configurations of hardware or software on EOS machines. 
+
+It is a modular wrapper around existing load testing and benchmarking tools (grid-hammer, filebench, fio). It permutates over tools parameters and collects logs in an organized directory structure. 
+
+The analysis script parses output logs of tools and prints/compares the results of completed runs. 
+
+The tool is containerized with Docker, thus allowing it to run on any VM with access to EOS.
+
+### Components and scripts
+- `conf.sh` - configuration file for setting all important variables and parameters for the loadtester
+- `install-loadtest.sh` - installs dependencies and benchmarking tools on a clean machine
+- `loadtest.sh` - main script, runs the tools, visualizer and data analysis
+- `tools/` - directory with wrapper scripts for benchmarking tools, can be run individually
+- `analysis.py` - Python script for parsing and comparing results of benchmarking tools
+- `summary.py` - Python script prints summarized differences in percentage between two analysis results.
+- `Dockerfile` - Dockerfile for building the image, similar to `install-loadtest.sh`
 
 
-## Getting started
+## Installation and requirements
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+The tool can be used as a docker image. In case one wants to install it directly on a machine, the following requirements should be met:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- `yum`, `git`, `python2`
+- OPTIONAL: python2 module: `matplotlib` (for hammer visualizer)
 
-## Add your files
+Everything else will be installed by the `install-loadtest.sh` script.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+> ⚠️ NOTE:
+>
+> If installing the software without the install script, log parsing is not guaranteed to work on all software versions. The developed tool was tested with the following versions:
+>
+> - grid-hammer-0.0.1.115.c3c1158-1.el7.cern.x86_64
+> - filebench-1.5-alpha3
+> - fio-3.7
 
+### Install
+
+```bash
+git clone https://gitlab.cern.ch/AIGROUP-eos-admins/eoshpm-loadtest.git
+cd eoshpm-loadtest
+./install-loadtest.sh
 ```
-cd existing_repo
-git remote add origin https://gitlab.cern.ch/AIGROUP-eos-admins/eoshpm-loadtest.git
-git branch -M master
-git push -uf origin master
+
+
+## Usage 
+
+> ⚠️ Important:
+>
+> Before using the tool user should check system limits on the testing VM: `ulimit -n`, if the limit for `open files` is set to default `1024` grid hammer will fail at high thread count. Limit should be increased as `ulimit -n 1048576`. Note that by running `./install-loadtest.sh` or using docker image this will be fixed automatically.
+
+Open configuration file `conf.sh`. At minimum, change the variables for mountpoints, directories and urls.
+
+Run the tool as:
+
+```bash
+./loadtest.sh
 ```
 
-## Integrate with your tools
+Or run individual tools from `tools/` directory:
+```bash
+./tools/hammer-wrapper.sh
+./tools/fio-wrapper.sh
+./tools/filebench-wrapper.sh
+```
+Additionaly `--compare` flag can be used with `loadtest.sh` to compare results of two latest runs.
+Without running the test, user can use `analysis.py` script to check the results of previous runs. Or compare them with older runs by using `--old` flags and some bash commands:
+```bash
+# Pretty prints the results of the latest run
+./analysis.py
 
-- [ ] [Set up project integrations](https://gitlab.cern.ch/AIGROUP-eos-admins/eoshpm-loadtest/-/settings/integrations)
+# Prints the results of any run with --old <num> flag, where 1 is the latest run
+./analysis.py --old 2
 
-## Collaborate with your team
+# Compares the results of two latest runs
+paste <(./analysis.py --old 2) <(./analysis.py) | column -s $'\t' -t
+``````
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+Note that filebench has its own config file in `tools/filbench-config/filserver.f`, where flow of operations and parameters can be adjusted.
 
-## Test and Deploy
+## Docker
 
-Use the built-in continuous integration in GitLab.
+Latest image location from master:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+[gitlab-registry.cern.ch/aigroup-eos-admins/eoshpm-loadtest:latest](gitlab-registry.cern.ch/aigroup-eos-admins/eoshpm-loadtest:latest)
 
-***
+Container should be ran as:
+```bash
+docker run -it --net=host --entrypoint /bin/bash -v <eos-mountpoint>:/eos/homedev/loadtest -v /etc/<krb5.keytab.* file>:/host-etc/<krb5.keytab.* file> eoshpm-loadtest
+```
+Change `<eos-mountpoint>` to where EOS is mounted on the host machine.
 
-# Editing this README
+Second volume (`<krb5.keytab.* file>`) should point to Kerberos keytab file, which is needed for writing to EOS. Only one keytab file should be mounted or the tool will fail.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+To directly run the tool through container use entrypoint: `--entrypoint /eoshpm-loadtest/loadtester.sh`.
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Further development
+The tool is designed to be modular, so adding new tools should be straightforward, with the exception of the analysis script, which requires complex parsing of the output logs of each tool.
 
-## Name
-Choose a self-explaining name for your project.
+To add a new tool, a developer should create a wrapper script in the `tools/` directory named similar to `<tool>-wrapper.sh`. The wrapper script should run the tool in the appropriate runspace and collect the output logs in a structured directory in a similar way to other tools.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+All important configurations and bash variables need to be set in the `conf.sh` file.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Requirements and installation of the tool can be added to the `install-loadtest.sh` script as well as Dockerfile.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Optionally, calling of the wrapper script can be added to `loadtest.sh`, and functions for passing output can be added to `analysis.py` and `summary.py`.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Documentation and the structure of the code are clear from comments inside the source code.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+After commiting changes to the repository and merging with master, gitlab CI/CD will automatically build a new docker image and push it to the registry.
 
 ## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Project by CERN Openlab summer student [Andrej Čop](mailto:andrej7.cop@gmail.com), supervisor Emmanouil Bagakis and with help of the EOSHPM team. The project is part of CERN IT-SD-GSS section.
 
+Project would not be possible without existing tools:
+- [grid-hammer](https://gitlab.cern.ch/lcgdm/grid-hammer/-/tree/master)
+
+<<<<<<< HEAD
 ## License
 For open source projects, say how it is licensed!
+=======
+- [filebench](https://github.com/filebench/filebench)
+>>>>>>> qa
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- [fio](https://fio.readthedocs.io/en/latest/fio_doc.html)
