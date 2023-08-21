@@ -24,17 +24,17 @@
 #
 
 set $dir=UNDEFINED
-set $nfiles=1000
+set $nfiles=30000
 set $meandirwidth=20
-set $filesize=1m
-set $nthreads=10
-set $iosize=1m
+set $filesize=5k
+set $nthreads=1
+set $iosize=5k
 
-define fileset name=bigfileset,path=$dir,size=$filesize,entries=$nfiles,dirwidth=$meandirwidth,prealloc=80
+define fileset name=bigfileset,path=$dir,size=$filesize,entries=$nfiles,dirwidth=$meandirwidth
 
 define process name=filereader,instances=1
 {
-  thread name=filereaderthread,memsize=10m,instances=$nthreads
+  thread name=filereaderthread,memsize=10k,instances=$nthreads
   {
     flowop createfile name=createfile1,filesetname=bigfileset,fd=1
     flowop writewholefile name=wrtfile1,srcfd=1,fd=1,iosize=$iosize
@@ -47,4 +47,4 @@ define process name=filereader,instances=1
   }
 }
 
-run 60
+run 120

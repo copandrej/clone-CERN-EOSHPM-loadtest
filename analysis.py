@@ -76,7 +76,8 @@ def parse_fio(filename: str) -> tuple:
     metrics["Write stdev latency [ms]"] = round(data["jobs"][0]['write']['lat_ns']['stddev'] / 1_000_000, 5)
 
     configs["Number of threads"] = data["jobs"][0]["job options"]["numjobs"]
-    configs["Size of files [MB]"] = data["jobs"][0]["job options"]["size"]
+    configs["Size of files"] = data["jobs"][0]["job options"]["size"]
+    configs["Block size"] = data["jobs"][0]["job options"]["bs"]
 
     return metrics, configs
 

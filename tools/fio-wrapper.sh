@@ -14,6 +14,6 @@ for njobs in "${num_of_jobs[@]}";
 do
     for size in "${size_of_file[@]}";
     do
-        fio --name=load_test --time_based=1 --runtime=60s --output-format=json --verify_state_save=0 --ioengine=sync --rw=rw --numjobs=$njobs --group_reporting --direct=1 --size=$size\M --verify=md5 --verify_fatal=1 --directory=$fuse_mountpoint/fio/$folder/ --output $logs_dir/fio/$folder/fio_njobs_$njobs\_size_$size.log > /dev/null
+        fio --name=load_test --time_based=1 --runtime=60s --output-format=json --verify_state_save=0 --ioengine=sync --rw=rw --numjobs=$njobs --bs=$block_size --group_reporting --direct=1 --size=$size --verify=md5 --verify_fatal=1 --directory=$fuse_mountpoint/fio/$folder/ --output $logs_dir/fio/$folder/fio_njobs_$njobs\_size_$size.log > /dev/null
     done
 done
