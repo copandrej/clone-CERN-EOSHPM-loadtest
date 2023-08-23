@@ -53,13 +53,7 @@ def hammer_changes(test: dict, data: dict) -> tuple:
             write_change = 100 * (test_new["result"]["write rate [files/s]"] - test["result"]
                                 ["write rate [files/s]"])/test["result"]["write rate [files/s]"]
             
-            read_max_latency_change = 100 * (test["result"]["read max latency [ms]"] - test_new["result"]
-                                            ["read max latency [ms]"])/test["result"]["read max latency [ms]"]
-            
-            write_max_latency_change = 100 * (test["result"]["write max latency [ms]"] - test_new["result"]
-                                            ["write max latency [ms]"])/test["result"]["write max latency [ms]"]
-            
-            return read_change, write_change, read_max_latency_change, write_max_latency_change
+            return read_change, write_change
         
     raise Exception("ERROR: Hammer tests that are being compared don't have the same configs!")
     
@@ -115,19 +109,15 @@ def main() -> None:
     print("Write latency: {:.2f}%".format(write_mean_latency_change/len(data["fio"])))
     
     print("\nHammer average changes:\n")
-    read_change, write_change, read_max_latency_change, write_max_latency_change = 0, 0, 0, 0
+    read_change, write_change = 0, 0
     
     for test in data["hammer"]:
         tpl = hammer_changes(test, data_new)
         read_change += tpl[0]
         write_change += tpl[1]
-        read_max_latency_change += tpl[2]
-        write_max_latency_change += tpl[3]
         
     print("Read rate: {:.2f}%".format(read_change/len(data["hammer"])))
     print("Write rate: {:.2f}%".format(write_change/len(data["hammer"])))
-    print("Read max latency: {:.2f}%".format(read_max_latency_change/len(data["hammer"])))
-    print("Write max latency: {:.2f}%".format(write_max_latency_change/len(data["hammer"])))
     
     print_separator()
     

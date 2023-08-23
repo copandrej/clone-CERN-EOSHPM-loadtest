@@ -8,6 +8,8 @@ The analysis script parses output logs of tools and prints/compares the results 
 
 The tool is containerized with Docker, thus allowing it to run on any VM with access to EOS.
 
+For more detailed explanation of the development process and the tool please refer to the project report.
+
 ### Components and scripts
 - `conf.sh` - configuration file for setting all important variables and parameters for the loadtester
 - `install-loadtest.sh` - installs dependencies and benchmarking tools on a clean machine
@@ -16,11 +18,12 @@ The tool is containerized with Docker, thus allowing it to run on any VM with ac
 - `analysis.py` - Python script for parsing and comparing results of benchmarking tools
 - `summary.py` - Python script prints summarized differences in percentage between two analysis results.
 - `Dockerfile` - Dockerfile for building the image, similar to `install-loadtest.sh`
+- `scenarios/` - directory with scenario config files for loadtester. Files can be copied to `conf.sh` and used as a configuration for loadtester.
 
 
 ## Installation and requirements
 
-The tool can be used as a docker image. In case one wants to install it directly on a machine, the following requirements should be met:
+The tool can be used as a docker image (refer to "Docker" section). In case one wants to install it directly on a machine, the following requirements should be met:
 
 - `yum`, `git`, `python2`
 - OPTIONAL: python2 module: `matplotlib` (for hammer visualizer)
@@ -79,13 +82,16 @@ paste <(./analysis.py --old 2) <(./analysis.py) | column -s $'\t' -t
 
 Note that filebench has its own config file in `tools/filbench-config/filserver.f`, where flow of operations and parameters can be adjusted.
 
+### Scenarios
+To use scenario configurations simply copy the desired scenario file from `scenarios/` to `conf.sh` and run the tool. Scenarios are just a set of parameters for the tool, which can be changed by the user. Refer to project report for explanation of each scenario.
+
 ## Docker
 
 Latest image location from master:
 
 [gitlab-registry.cern.ch/aigroup-eos-admins/eoshpm-loadtest:latest](gitlab-registry.cern.ch/aigroup-eos-admins/eoshpm-loadtest:latest)
 
-Container should be ran as:
+Pull the image from the registry. Container should be ran as:
 ```bash
 docker run -it --net=host --entrypoint /bin/bash -v <eos-mountpoint>:/eos/homedev/loadtest -v /etc/<krb5.keytab.* file>:/host-etc/<krb5.keytab.* file> eoshpm-loadtest
 ```
@@ -95,8 +101,22 @@ Second volume (`<krb5.keytab.* file>`) should point to Kerberos keytab file, whi
 
 To directly run the tool through container use entrypoint: `--entrypoint /eoshpm-loadtest/loadtester.sh`.
 
+## TODO
+Due to time constraints, some limitations and unexpected behavior of the tools were not fixed.
+
+- Scertain scenarios of Filebench fail ocasionally. Errors should be investigated. Very likely the problem is with the tool rather then EOS.
+
+- Grid Hammer still ocasionally produces "No route to host error". This was not happening previously after the open files limit was increased.
+
+- Scenarios and configurations have room for improvement. Scenarios should more closely resemble real use cases. And the selection of parameters should be justified.
+
+- The tool should be used and tested with configuration changes and emulating pseudo incidents on EOS dev machine as was originally planned.
+
+- Further some suggestions were made to export the data from the tool to grafana dashboard.
+
+
 ## Further development
-The tool is designed to be modular, so adding new tools should be straightforward, with the exception of the analysis script, which requires complex parsing of the output logs of each tool.
+Loadtester is designed to be modular, so adding new tools should be straightforward, with the exception of the analysis script, which requires complex parsing of the output logs of each tool.
 
 To add a new tool, a developer should create a wrapper script in the `tools/` directory named similar to `<tool>-wrapper.sh`. The wrapper script should run the tool in the appropriate runspace and collect the output logs in a structured directory in a similar way to other tools.
 

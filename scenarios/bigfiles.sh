@@ -33,4 +33,4 @@ config_file=tools/filebench-configs/bigfiles.f
 
 num_of_jobs=(2 4 10)
 size_of_file=(500M)
-block_size=4096K
+block_size=4M

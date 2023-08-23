@@ -33,4 +33,4 @@ config_file=tools/filebench-configs/highthreads.f
 
 num_of_jobs=(10 20 50 100)
 size_of_file=(1M)
-block_size=4096K
+block_size=1M
